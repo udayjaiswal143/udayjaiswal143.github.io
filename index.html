@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uday Jaiswal — Creative Technologist | Video Editor | AI/ML Enthusiast</title>
+    <meta name="description" content="Computer Science postgraduate building intelligent digital experiences through AI, video production, and creative technology. Portfolio of Uday Jaiswal.">
+    <meta name="keywords" content="Uday Jaiswal, WebGL Portfolio, Video Editor, AI ML, Computer Science, Three.js, GSAP, Creative Technologist">
+    <meta name="author" content="Uday Jaiswal">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Uday Jaiswal — Interactive WebGL Portfolio">
+    <meta property="og:description" content="Enter a living 3D digital universe showcasing AI/ML development, video editing, and creative technology.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://udayjaiswal.dev">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Importmap for Three.js (ES Module Addons) -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+        }
+      }
+    </script>
+</head>
+<body>
+
+    <!-- WebGL Canvas Background -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Custom Glowing Cursor -->
+    <div class="custom-cursor" id="custom-cursor"></div>
+    <div class="custom-cursor-dot" id="custom-cursor-dot"></div>
+
+    <!-- Background Noise Overlay for texture -->
+    <div class="noise-overlay" aria-hidden="true"></div>
+
+    <!-- ========== HUD HEADER ========== -->
+    <header class="hud-header">
+        <a href="#" class="hud-logo" aria-label="Uday Jaiswal - Home">UJ</a>
+        
+        <!-- Navigation Menu -->
+        <nav class="hud-nav" role="navigation" aria-label="Main HUD navigation">
+            <ul class="nav-links" role="list">
+                <li><button class="nav-link active" data-index="0">00 // Core</button></li>
+                <li><button class="nav-link" data-index="1">01 // City</button></li>
+                <li><button class="nav-link" data-index="2">02 // Neural</button></li>
+                <li><button class="nav-link" data-index="3">03 // Planets</button></li>
+                <li><button class="nav-link" data-index="4">04 // Corridor</button></li>
+                <li><button class="nav-link" data-index="5">05 // Terminal</button></li>
+            </ul>
+        </nav>
+
+        <!-- Right Side HUD Controls -->
+        <div class="hud-controls">
+            <button class="perf-toggle" id="perf-toggle" aria-label="Toggle High Performance Mode">
+                <span class="perf-status"></span>
+                <span class="perf-text">FX // ON</span>
+            </button>
+            <a href="#contact" class="hud-cta btn-trigger-contact">Initialize Connection</a>
+        </div>
+    </header>
+
+    <!-- ========== SIDEBAR SCROLL MONITOR ========== -->
+    <div class="hud-sidebar" aria-hidden="true">
+        <div class="sidebar-line">
+            <div class="sidebar-fill" id="sidebar-fill"></div>
+        </div>
+        <div class="sidebar-sections">
+            <div class="sidebar-dot active" data-index="0"></div>
+            <div class="sidebar-dot" data-index="1"></div>
+            <div class="sidebar-dot" data-index="2"></div>
+            <div class="sidebar-dot" data-index="3"></div>
+            <div class="sidebar-dot" data-index="4"></div>
+            <div class="sidebar-dot" data-index="5"></div>
+        </div>
+    </div>
+
+    <!-- ========== INTERACTIVE MODAL / PROJECT DETAIL PANEL ========== -->
+    <div class="hud-project-modal" id="project-modal">
+        <button class="modal-close" id="modal-close" aria-label="Close project info">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div class="modal-content">
+            <span class="modal-tag" id="modal-tag">CATEGORY</span>
+            <h3 class="modal-title" id="modal-title">Project Title</h3>
+            <p class="modal-description" id="modal-description">Project description goes here.</p>
+            <div class="modal-tech" id="modal-tech">
+                <!-- Dynamic tech chips -->
+            </div>
+            <a href="#" class="modal-link" id="modal-link" target="_blank" rel="noopener">
+                Launch Artifact
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- ========== TRANSPARENT SCROLL LAYERS ========== -->
+    <main class="scroll-container">
+
+        <!-- 0. HERO WORLD -->
+        <section class="scroll-section" id="hero-sec">
+            <div class="hud-panel hero-panel">
+                <div class="hud-badge">
+                    <span class="hud-badge-dot"></span>
+                    SYSTEMS INITIATED // ACTIVE FOR FREELANCE & FULL-TIME
+                </div>
+                <h1 class="hero-title">
+                    UDAY<br><span class="accent-gold-text">JAISWAL</span>
+                </h1>
+                <div class="hero-subtitle">
+                    <span class="tech-label">ROLE //</span>
+                    <span class="rotating-text" id="rotating-role">Creative Technologist</span>
+                </div>
+                <p class="hero-description">
+                    Forging intelligent digital dimensions at the intersection of computer science, 
+                    AI systems, and cinematic production. Step into the workspace.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn-primary" onclick="scrollToIndex(3)">Inspect Artifacts</button>
+                    <button class="btn-secondary btn-trigger-contact">Establish Link</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. ABOUT WORLD -->
+        <section class="scroll-section" id="about-sec">
+            <div class="hud-panel about-panel">
+                <div class="panel-header">
+                    <span class="panel-num">01 //</span>
+                    <h2 class="panel-title">BIOLOGICAL OVERVIEW</h2>
+                </div>
+                <div class="panel-content">
+                    <p>
+                        Postgraduate scholar in Computer Science (M.Sc. CS at Guru Ghasidas Vishwavidyalaya) and creative technologist operating at the intersection of AI system engineering and cinematic video production.
+                    </p>
+                    <p>
+                        During my internship at **Chrysalis Media**, I directed commercial visual campaigns for multiple luxury and boutique brands—including Bilaspur's **House of Annie**, UK-based **House of Kavati**, Dubai-based coffee house **Agasiaclub** (currently active project), **Naresh Fashion**, and hospitality estates **LM Farms & Farmside**.
+                    </p>
+                    <p>
+                        Specialized in translating advanced software architecture and data structures into high-end, premium brand aesthetics.
+                    </p>
+                    
+                    <div class="about-stats-hud">
+                        <div class="hud-stat">
+                            <span class="stat-num">02+</span>
+                            <span class="stat-label">YEARS TECH & MEDIA EXP</span>
+                        </div>
+                        <div class="hud-stat">
+                            <span class="stat-num">15+</span>
+                            <span class="stat-label">COMPLETED PIPELINES</span>
+                        </div>
+                        <div class="hud-stat">
+                            <span class="stat-num">06+</span>
+                            <span class="stat-label">BRANDS SCALE INTEGRATED</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SKILLS WORLD -->
+        <section class="scroll-section" id="skills-sec">
+            <div class="hud-panel skills-panel">
+                <div class="panel-header">
+                    <span class="panel-num">02 //</span>
+                    <h2 class="panel-title">NEURAL GRAPH CAPABILITIES</h2>
+                </div>
+                <p class="skills-intro">
+                    Hover or click the glowing nodes in the 3D grid to trace skill weights.
+                </p>
+                <div class="skills-summary-cards">
+                    <div class="skills-summary-card">
+                        <h4>AI & DEVELOPMENT</h4>
+                        <div class="hud-skill-chips">
+                            <span>Python</span><span>AI / ML</span><span>FastAPI</span><span>TF-IDF</span><span>NLP</span>
+                        </div>
+                    </div>
+                    <div class="skills-summary-card">
+                        <h4>VIDEO PRODUCTION</h4>
+                        <div class="hud-skill-chips">
+                            <span>Premiere Pro</span><span>CapCut</span><span>Color Grading</span><span>Motion Graphics</span><span>AI Video</span>
+                        </div>
+                    </div>
+                    <div class="skills-summary-card">
+                        <h4>STRATEGY & TOOLS</h4>
+                        <div class="hud-skill-chips">
+                            <span>Camera Operation</span><span>Lighting</span><span>Social Strategy</span><span>Branding</span><span>Canva</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PROJECTS WORLD -->
+        <section class="scroll-section" id="projects-sec">
+            <div class="hud-panel projects-panel">
+                <div class="panel-header">
+                    <span class="panel-num">03 //</span>
+                    <h2 class="panel-title">ORBITAL ARTIFACTS</h2>
+                </div>
+                <p class="projects-intro">
+                    Interfacing with floating project planetary systems. Click a planet in 3D to download data logs.
+                </p>
+                <div class="projects-fallback-list">
+                    <div class="fallback-proj-item" onclick="openProjectData(0)">
+                        <span class="fallback-tag">AI/ML ENGINE</span>
+                        <h4>Movie Recommendation System</h4>
+                    </div>
+                    <div class="fallback-proj-item" onclick="openProjectData(1)">
+                        <span class="fallback-tag">VIDEO PRODUCTION / BILASPUR</span>
+                        <h4>House of Annie</h4>
+                    </div>
+                    <div class="fallback-proj-item" onclick="openProjectData(2)">
+                        <span class="fallback-tag">VIDEO PRODUCTION / UK BRAND</span>
+                        <h4>House of Kavati</h4>
+                    </div>
+                    <div class="fallback-proj-item" onclick="openProjectData(3)">
+                        <span class="fallback-tag">CURRENT PROJECT / DUBAI COFFEE</span>
+                        <h4>Agasiaclub</h4>
+                    </div>
+                    <div class="fallback-proj-item" onclick="openProjectData(4)">
+                        <span class="fallback-tag">SOCIAL CAMPAIGN</span>
+                        <h4>Naresh Fashion</h4>
+                    </div>
+                    <div class="fallback-proj-item" onclick="openProjectData(5)">
+                        <span class="fallback-tag">COMMERCIAL VIDEO</span>
+                        <h4>LM Farms & Farmside</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. EXPERIENCE WORLD -->
+        <section class="scroll-section" id="experience-sec">
+            <div class="hud-panel experience-panel">
+                <div class="panel-header">
+                    <span class="panel-num">04 //</span>
+                    <h2 class="panel-title">TIMELINE CORRIDOR</h2>
+                </div>
+                <div class="timeline-hud-list">
+                    <div class="timeline-hud-item">
+                        <div class="timeline-hud-header">
+                            <span class="time-role">Freelance Designer & Editor</span>
+                            <span class="time-date">2024 — PRESENT</span>
+                        </div>
+                        <p class="time-desc">
+                            Directing digital media campaigns and video production pipelines for international coffee brand Agasiaclub (Dubai). Engineering motion assets and high-impact social campaigns for luxury brands.
+                        </p>
+                    </div>
+                    
+                    <div class="timeline-hud-item">
+                        <div class="timeline-hud-header">
+                            <span class="time-role">Production Intern</span>
+                            <span class="time-date">2024 (2.5 MO)</span>
+                        </div>
+                        <p class="time-desc">
+                            Managed end-to-end commercial video production pipelines, including cinematic filming, lighting design, color grading, and audio post-production. I declare that all commercial brand projects (including Bilaspur's **House of Annie**, UK-based **House of Kavati**, Dubai's **Agasiaclub**, **Naresh Fashion**, and **LM Farms & Farmside**) were executed during my internship at Chrysalis Media.
+                        </p>
+                    </div>
+
+                    <div class="timeline-hud-item">
+                        <div class="timeline-hud-header">
+                            <span class="time-role">Media Team Lead</span>
+                            <span class="time-date">2024 — PRESENT</span>
+                        </div>
+                        <p class="time-desc">
+                            Supervising visual coverage and creative direction for high-profile university events. Coordinating media production workflows and social content strategy for Tarang Band, GGU.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="education-hud-container">
+                    <h3 class="sub-section-title">// ACADEMIC PIPELINES</h3>
+                    <div class="edu-hud-item">
+                        <span class="edu-degree">M.Sc. Computer Science</span>
+                        <span class="edu-inst">GGU Bilaspur // 2024 — 2026 (Ongoing)</span>
+                    </div>
+                    <div class="edu-hud-item">
+                        <span class="edu-degree">Bachelor of Computer Applications (BCA)</span>
+                        <span class="edu-inst">SNP Vishwavidyalaya // 2021 — 2024</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. CONTACT WORLD -->
+        <section class="scroll-section" id="contact-sec">
+            <div class="hud-panel contact-panel">
+                <div class="panel-header">
+                    <span class="panel-num">05 //</span>
+                    <h2 class="panel-title">ESTABLISH CHANNEL</h2>
+                </div>
+                
+                <div class="contact-hud-grid">
+                    <div class="contact-hud-links">
+                        <p>Initiate standard communication packet or establish connections via holographic nodes.</p>
+                        
+                        <div class="hud-link-group">
+                            <a href="mailto:udaycontactus@gmail.com" class="hud-social-link">
+                                <span class="link-label">MAIL //</span> udaycontactus@gmail.com
+                            </a>
+                            <a href="https://www.linkedin.com/in/uday-jaiswal143" target="_blank" rel="noopener" class="hud-social-link">
+                                <span class="link-label">LINKEDIN //</span> uday-jaiswal143
+                            </a>
+                            <a href="https://github.com/udayjaiswal143" target="_blank" rel="noopener" class="hud-social-link">
+                                <span class="link-label">GITHUB //</span> udayjaiswal143
+                            </a>
+                            <a href="https://www.instagram.com/udayjaiswal143" target="_blank" rel="noopener" class="hud-social-link">
+                                <span class="link-label">INSTAGRAM //</span> @udayjaiswal143
+                            </a>
+                        </div>
+                        
+                        <div class="certifications-hud">
+                            <h4 class="sub-section-title">// RECOGNIZED CREDENTIALS</h4>
+                            <ul>
+                                <li>Video Editing & Graphics (Chrysalis Media Cert)</li>
+                                <li>2+ Years Commercial Media Deliverables</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <form class="contact-hud-form" id="contact-form" onsubmit="handleFormSubmit(event)">
+                        <div class="hud-input-group">
+                            <label for="name">NAME //</label>
+                            <input type="text" id="name" name="name" placeholder="INITIATOR NAME" required autocomplete="off">
+                        </div>
+                        <div class="hud-input-group">
+                            <label for="email">EMAIL //</label>
+                            <input type="email" id="email" name="email" placeholder="INITIATOR EMAIL" required autocomplete="off">
+                        </div>
+                        <div class="hud-input-group">
+                            <label for="subject">SUBJECT //</label>
+                            <input type="text" id="subject" name="subject" placeholder="TRANSMISSION SUBJECT" required autocomplete="off">
+                        </div>
+                        <div class="hud-input-group">
+                            <label for="message">PACKET DATA //</label>
+                            <textarea id="message" name="message" placeholder="ENTER MESSAGE TRANSMISSION..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" id="form-submit-btn">
+                            TRANSMIT PACKET
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========== CORE SCRIPTS ========== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
+    <!-- main WebGL application module -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
