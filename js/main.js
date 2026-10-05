@@ -13,6 +13,8 @@ gsap.registerPlugin(ScrollTrigger);
 // --- ENGINE STATE ---
 let canvas, renderer, scene, camera, composer;
 let bloomPass, renderPass;
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
 // Global settings
 let fxEnabled = true;
@@ -75,12 +77,12 @@ function initEngine() {
     // Renderer
     renderer = new THREE.WebGLRenderer({
         canvas: canvas,
-        antialias: true,
+        antialias: !isTouchDevice,
         alpha: true,
         powerPreference: "high-performance"
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isTouchDevice ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
     
@@ -117,6 +119,11 @@ function initEngine() {
     composer = new EffectComposer(renderer);
     composer.addPass(renderPass);
     composer.addPass(bloomPass);
+
+    if (prefersReducedMotion) {
+        fxEnabled = false;
+        bloomPass.strength = 0.0;
+    }
     
     // Window resize handler
     window.addEventListener('resize', onWindowResize);
@@ -624,7 +631,7 @@ function setupScrollAnimations() {
             trigger: ".scroll-container",
             start: "top top",
             end: "bottom bottom",
-            scrub: 0.5,
+            scrub: prefersReducedMotion ? false : 0.5,
             onUpdate: (self) => {
                 // Update sidebar height filling bar
                 document.getElementById('sidebar-fill').style.height = `${self.progress * 100}%`;
@@ -669,7 +676,7 @@ function setupScrollAnimations() {
 window.scrollToIndex = function(index) {
     const sections = document.querySelectorAll('.scroll-section');
     if(sections[index]) {
-        sections[index].scrollIntoView({ behavior: 'smooth' });
+        sections[index].scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
     }
 };
 
@@ -686,6 +693,12 @@ function setupUserInteractions() {
         // Three.js Raycaster mapping normalized coordinates [-1, 1]
         mouseVector.x = (e.clientX / window.innerWidth) * 2 - 1;
         mouseVector.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+        if (e.pointerType === 'touch') return;
+        mouse.targetX = e.clientX;
+        mouse.targetY = e.clientY;
     });
     
     // Check buttons, links and elements for custom cursor hover enlargement
@@ -706,6 +719,10 @@ function setupUserInteractions() {
     
     // Performance FX Toggle click listener
     const perfToggle = document.getElementById('perf-toggle');
+    if (prefersReducedMotion) {
+        perfToggle.classList.add('eco');
+        document.querySelector('.perf-text').innerText = "FX // ECO";
+    }
     perfToggle.addEventListener('click', () => {
         fxEnabled = !fxEnabled;
         if(fxEnabled) {
@@ -724,6 +741,9 @@ function setupUserInteractions() {
         btn.addEventListener('click', (e) => {
             const idx = parseInt(e.target.dataset.index);
             scrollToIndex(idx);
+            document.body.classList.remove('nav-open');
+            const navToggle = document.getElementById('nav-toggle');
+            if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
         });
     });
     
@@ -740,6 +760,15 @@ function setupUserInteractions() {
             scrollToIndex(5);
         });
     });
+
+    const navToggle = document.getElementById('nav-toggle');
+    if (navToggle) {
+        navToggle.addEventListener('click', () => {
+            const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+            navToggle.setAttribute('aria-expanded', String(!expanded));
+            document.body.classList.toggle('nav-open', !expanded);
+        });
+    }
     
     // 3D Canvas clicks (avatar shockwave and projects Raycasting selection)
     canvas.addEventListener('click', () => {
@@ -756,8 +785,24 @@ function setupUserInteractions() {
     
     // Project detail modal controls
     document.getElementById('modal-close').addEventListener('click', () => {
-        document.getElementById('project-modal').classList.remove('active');
-        clickedPlanet = null;
+        closeProjectModal();
+    });
+
+    const projectModal = document.getElementById('project-modal');
+    projectModal.addEventListener('click', (event) => {
+        if (event.target === projectModal) {
+            closeProjectModal();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeProjectModal();
+            if (document.body.classList.contains('nav-open')) {
+                document.body.classList.remove('nav-open');
+                if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
+            }
+        }
     });
     
     // Establish Contact Form keyboard keypress listener to trigger upward glowing particles
@@ -766,7 +811,24 @@ function setupUserInteractions() {
         field.addEventListener('keypress', () => {
             spawnTypingParticle();
         });
+        field.addEventListener('focus', () => {
+            if (window.innerWidth <= 768) {
+                setTimeout(() => field.scrollIntoView({ block: 'center', behavior: prefersReducedMotion ? 'auto' : 'smooth' }), 200);
+            }
+        });
     });
+
+    const contactForm = document.getElementById('contact-form');
+    const formStatus = document.getElementById('form-status');
+    if (contactForm && formStatus) {
+        contactForm.addEventListener('invalid', (event) => {
+            event.preventDefault();
+            formStatus.innerText = 'Please complete all required fields with valid details.';
+        }, true);
+        contactForm.addEventListener('input', () => {
+            formStatus.innerText = '';
+        });
+    }
 }
 
 // Avatar shockwave expansion animation
@@ -942,7 +1004,14 @@ window.openProjectData = function(index) {
     }
     
     document.getElementById('project-modal').classList.add('active');
+    document.body.classList.add('modal-open');
 };
+
+function closeProjectModal() {
+    document.getElementById('project-modal').classList.remove('active');
+    document.body.classList.remove('modal-open');
+    clickedPlanet = null;
+}
 
 // --- ANIMATION LOOP ---
 function animate() {
@@ -1113,7 +1182,9 @@ function animate() {
 window.handleFormSubmit = function(event) {
     event.preventDefault();
     const btn = document.getElementById('form-submit-btn');
+    const formStatus = document.getElementById('form-status');
     const originalText = btn.innerText;
+    if (formStatus) formStatus.innerText = 'Preparing transmission...';
     
     btn.disabled = true;
     btn.innerText = "TRANSMITTING PACKET...";
@@ -1141,6 +1212,7 @@ window.handleFormSubmit = function(event) {
         btn.innerText = "PACKET INJECTED";
         btn.style.borderColor = "var(--accent-gold)";
         btn.style.color = "var(--accent-gold)";
+        if (formStatus) formStatus.innerText = 'Transmission ready. Your email app should open now.';
         
         // Reset form fields
         document.getElementById('contact-form').reset();
@@ -1150,6 +1222,7 @@ window.handleFormSubmit = function(event) {
             btn.innerText = originalText;
             btn.style.borderColor = "";
             btn.style.color = "";
+            if (formStatus) formStatus.innerText = '';
         }, 3000);
         
     }, 1500);
@@ -1157,6 +1230,7 @@ window.handleFormSubmit = function(event) {
 
 // Hero Role Auto-Rotation Carousel
 function initRoleRotation() {
+    if (prefersReducedMotion) return;
     const textEl = document.getElementById('rotating-role');
     if(!textEl) return;
     

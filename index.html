@@ -46,9 +46,12 @@
     <!-- ========== HUD HEADER ========== -->
     <header class="hud-header">
         <a href="#" class="hud-logo" aria-label="Uday Jaiswal - Home">UJ</a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Toggle navigation">
+            MENU
+        </button>
         
         <!-- Navigation Menu -->
-        <nav class="hud-nav" role="navigation" aria-label="Main HUD navigation">
+        <nav class="hud-nav" id="main-nav" role="navigation" aria-label="Main HUD navigation">
             <ul class="nav-links" role="list">
                 <li><button class="nav-link active" data-index="0">00 // Core</button></li>
                 <li><button class="nav-link" data-index="1">01 // City</button></li>
@@ -331,23 +334,24 @@
                     <form class="contact-hud-form" id="contact-form" onsubmit="handleFormSubmit(event)">
                         <div class="hud-input-group">
                             <label for="name">NAME //</label>
-                            <input type="text" id="name" name="name" placeholder="INITIATOR NAME" required autocomplete="off">
+                            <input type="text" id="name" name="name" placeholder="INITIATOR NAME" required autocomplete="name">
                         </div>
                         <div class="hud-input-group">
                             <label for="email">EMAIL //</label>
-                            <input type="email" id="email" name="email" placeholder="INITIATOR EMAIL" required autocomplete="off">
+                            <input type="email" id="email" name="email" placeholder="INITIATOR EMAIL" required autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off">
                         </div>
                         <div class="hud-input-group">
                             <label for="subject">SUBJECT //</label>
-                            <input type="text" id="subject" name="subject" placeholder="TRANSMISSION SUBJECT" required autocomplete="off">
+                            <input type="text" id="subject" name="subject" placeholder="TRANSMISSION SUBJECT" required autocomplete="on">
                         </div>
                         <div class="hud-input-group">
                             <label for="message">PACKET DATA //</label>
-                            <textarea id="message" name="message" placeholder="ENTER MESSAGE TRANSMISSION..." required></textarea>
+                            <textarea id="message" name="message" placeholder="ENTER MESSAGE TRANSMISSION..." required autocomplete="off"></textarea>
                         </div>
                         <button type="submit" class="btn-primary" id="form-submit-btn">
                             TRANSMIT PACKET
                         </button>
+                        <p class="form-status" id="form-status" aria-live="polite"></p>
                     </form>
                 </div>
             </div>
